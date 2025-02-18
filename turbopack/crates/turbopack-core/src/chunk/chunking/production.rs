@@ -15,8 +15,8 @@ use crate::{
     module_graph::ModuleGraph,
 };
 
-pub async fn make_production_chunks(
-    chunk_items: Vec<ChunkItemWithInfo>,
+pub async fn make_production_chunks<'l>(
+    chunk_items: Vec<&'l ChunkItemWithInfo>,
     module_graph: Vc<ModuleGraph>,
     chunking_config: &ChunkingConfig,
     mut split_context: SplitContext<'_>,
@@ -32,14 +32,14 @@ pub async fn make_production_chunks(
     async move {
         let chunk_group_info = module_graph.chunk_group_info().await?;
 
-        let mut grouped_chunk_items = FxIndexMap::<_, Vec<ChunkItemWithInfo>>::default();
+        let mut grouped_chunk_items = FxIndexMap::<_, Vec<_>>::default();
 
         for chunk_item in chunk_items {
             let ChunkItemWithInfo { module, .. } = chunk_item;
             let chunk_groups = if let Some(module) = module {
                 match chunk_group_info
                     .module_chunk_groups
-                    .get(&ResolvedVc::upcast(module))
+                    .get(&ResolvedVc::upcast(*module))
                 {
                     Some(chunk_group) => Some(chunk_group),
                     None => {
@@ -129,26 +129,26 @@ pub async fn make_production_chunks(
     .await
 }
 
-struct ChunkCandidate {
+struct ChunkCandidate<'l> {
     size: usize,
-    chunk_items: Vec<ChunkItemWithInfo>,
+    chunk_items: Vec<&'l ChunkItemWithInfo>,
 }
 
-impl Ord for ChunkCandidate {
+impl Ord for ChunkCandidate<'_> {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.size.cmp(&other.size).reverse()
     }
 }
 
-impl PartialOrd for ChunkCandidate {
+impl PartialOrd for ChunkCandidate<'_> {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Eq for ChunkCandidate {}
+impl Eq for ChunkCandidate<'_> {}
 
-impl PartialEq for ChunkCandidate {
+impl PartialEq for ChunkCandidate<'_> {
     fn eq(&self, other: &Self) -> bool {
         self.size == other.size
     }
