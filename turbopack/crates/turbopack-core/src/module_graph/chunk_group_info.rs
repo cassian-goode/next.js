@@ -15,7 +15,7 @@ use tracing::Instrument;
 use turbo_rcstr::RcStr;
 use turbo_tasks::{
     debug::ValueDebugFormat, trace::TraceRawVcs, FxIndexMap, FxIndexSet, NonLocalValue, ResolvedVc,
-    TaskInput, TryJoinIterExt, ValueToString, Vc,
+    TaskInput, TryJoinIterExt, Vc,
 };
 
 use crate::{
@@ -127,47 +127,6 @@ impl ChunkGroup {
             ChunkGroup::IsolatedMerged { entries, .. }
             | ChunkGroup::SharedMerged { entries, .. } => Either::Right(entries.iter().copied()),
         }
-    }
-
-    pub async fn to_string(&self) -> Result<String> {
-        Ok(match self {
-            ChunkGroup::Entry(e) => format!("Entry({})", e.ident().to_string().await?),
-            ChunkGroup::Async(e) => format!("Async({})", e.ident().to_string().await?),
-            ChunkGroup::Isolated(e) => format!("Isolated({})", e.ident().to_string().await?),
-            ChunkGroup::IsolatedMerged {
-                parent,
-                merge_tag,
-                entries,
-            } => {
-                format!(
-                    "IsolatedMerged({:?}, {}, {:#?})",
-                    parent,
-                    merge_tag,
-                    entries
-                        .iter()
-                        .map(|e| e.ident().to_string())
-                        .try_join()
-                        .await?
-                )
-            }
-            ChunkGroup::Shared(e) => format!("Shared({})", e.ident().to_string().await?),
-            ChunkGroup::SharedMerged {
-                parent,
-                merge_tag,
-                entries,
-            } => {
-                format!(
-                    "SharedMerged({:?}, {}, {:#?})",
-                    parent,
-                    merge_tag,
-                    entries
-                        .iter()
-                        .map(|e| e.ident().to_string())
-                        .try_join()
-                        .await?
-                )
-            }
-        })
     }
 }
 
