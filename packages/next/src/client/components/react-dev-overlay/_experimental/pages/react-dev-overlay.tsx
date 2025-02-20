@@ -26,12 +26,8 @@ export default function ReactDevOverlay({ children }: ReactDevOverlayProps) {
 
   const [isErrorOverlayOpen, setIsErrorOverlayOpen] = useState(true)
 
-  return (
+  const devOverlay = (
     <>
-      <DevOverlayErrorBoundary onError={onComponentError}>
-        {children ?? null}
-      </DevOverlayErrorBoundary>
-
       {/* Fonts can only be loaded outside the Shadow DOM. */}
       <FontStyles />
       <ShadowPortal>
@@ -65,6 +61,15 @@ export default function ReactDevOverlay({ children }: ReactDevOverlayProps) {
           }}
         </RenderError>
       </ShadowPortal>
+    </>
+  )
+
+  return (
+    <>
+      <DevOverlayErrorBoundary onError={onComponentError}>
+        {children ?? null}
+      </DevOverlayErrorBoundary>
+      <React.Suspense>{devOverlay}</React.Suspense>
     </>
   )
 }

@@ -1,7 +1,7 @@
 import type { OverlayState } from '../../shared'
 import type { GlobalErrorComponent } from '../../../error-boundary'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { DevOverlayErrorBoundary } from './error-boundary'
 import { ShadowPortal } from '../internal/components/shadow-portal'
 import { Base } from '../internal/styles/base'
@@ -62,12 +62,14 @@ export default function ReactDevOverlay({
   )
 
   return (
-    <DevOverlayErrorBoundary
-      devOverlay={devOverlay}
-      globalError={globalError}
-      onError={setIsErrorOverlayOpen}
-    >
-      {children}
-    </DevOverlayErrorBoundary>
+    <>
+      <DevOverlayErrorBoundary
+        globalError={globalError}
+        onError={setIsErrorOverlayOpen}
+      >
+        {children}
+      </DevOverlayErrorBoundary>
+      <Suspense>{devOverlay}</Suspense>
+    </>
   )
 }
