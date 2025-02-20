@@ -1911,7 +1911,7 @@ impl<C: Comments> VisitMut for ServerActions<C> {
                                                 {
                                                     ident.span
                                                 } else {
-                                                    PURE_SP
+                                                    DUMMY_SP
                                                 },
                                             )
                                             .into(),
